@@ -10,9 +10,8 @@ from scipy.optimize import brentq
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'manuscript_figure_scripts/figures'))
-import roll_model as m
-OUT=Path(__file__).resolve().parent/'results'; OUT.mkdir(exist_ok=True)
+from model import roll_model as m
+OUT=Path(__file__).resolve().parents[1]/'data'/'results'; OUT.mkdir(parents=True,exist_ok=True)
 AF=m.reference_values()['alphaF']
 # O+ mass from the standard atomic weight of oxygen (15.999 u), not 16 proton masses.
 M_OXYGEN_ION=15.999*atomic_mass

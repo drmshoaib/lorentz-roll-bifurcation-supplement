@@ -6,9 +6,9 @@ size and their lettering matches the text. Colours follow one scheme throughout:
 roll centres are blue circles, saddles orange crosses, and charge levels a
 single-hue ramp from light (far from the fold) to dark (close to it).
 
-Outputs (figures_out/): figure_*_revised.pdf, and
+Outputs (figures/generated/): figure_*_revised.pdf, and
 orbital_matched_poincare_revised.pdf, which is drawn from the data written by
-research_assets/python/revision_checks/orbital_poincare.py.
+numerical_experiments/orbital_poincare.py.
 The original manuscript's figures and scripts are not affected.
 """
 from pathlib import Path
@@ -23,12 +23,12 @@ from matplotlib.lines import Line2D
 from scipy.integrate import quad
 from scipy.optimize import brentq
 
-import roll_model as m
+from model import roll_model as m
 
 HERE = Path(__file__).resolve().parent
-OUT = HERE.parent / "figures_out"
+OUT = HERE / "generated"
 OUT.mkdir(exist_ok=True)
-ORBITAL = HERE.parents[1] / "revision_checks" / "results"
+ORBITAL = HERE.parent / "data" / "results"
 
 # ---------------------------------------------------------------- style
 TEXTWIDTH = 390.0 / 72.27          # inches

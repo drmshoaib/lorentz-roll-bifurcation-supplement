@@ -1,9 +1,9 @@
 """Plot directly integrated three-axis control response; all curves numerical."""
 from pathlib import Path
 import matplotlib.pyplot as plt
-from controlled_three_axis_validation import run
+from numerical_experiments.controlled_three_axis_validation import run
 
-out=Path(__file__).resolve().parent
+out=Path(__file__).resolve().parents[1]/'figures'/'generated';out.mkdir(parents=True,exist_ok=True)
 fig,axes=plt.subplots(3,1,figsize=(7.15,7.9),sharex=True,constrained_layout=True)
 for ratio in [0.5,0.9]:
     row,(t,tilt,roll,torque,err)=run(ratio,perturb_deg=2.,orbits=3.,samples_per_orbit=900,

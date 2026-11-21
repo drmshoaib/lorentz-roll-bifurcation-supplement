@@ -5,10 +5,9 @@ import numpy as np
 import scipy,matplotlib
 from scipy.optimize import brentq
 from scipy.integrate import solve_ivp,quad
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'manuscript_figure_scripts/figures'))
-import roll_model as m
-from controlled_three_axis_validation import init_orbit,coeff,reference_dynamics_check
-OUT=Path(__file__).resolve().parent/'results';OUT.mkdir(exist_ok=True)
+from model import roll_model as m
+from numerical_experiments.controlled_three_axis_validation import init_orbit,coeff,reference_dynamics_check
+OUT=Path(__file__).resolve().parents[1]/'data'/'results';OUT.mkdir(parents=True,exist_ok=True)
 v=m.reference_fold(); al,bl,c,af,phif=(v[k] for k in ['aL','bL','c','alphaF','phiF'])
 # Three-axis vector formulation gives independent coefficients from orbital states.
 R,V=init_orbit(.001); independent=coeff(R,V)
@@ -47,7 +46,7 @@ period_event=float(sol.t_events[0][1]-sol.t_events[0][0])
 energy_values=.5*m.C_INERTIA*sol.y[1]**2+m.potential(sol.y[0],alpha,al,bl,c)
 drift=float(np.ptp(energy_values)/(energy-m.potential(pc,alpha,al,bl,c)))
 assert drift<1e-7 and abs(period_event/period_quad-1)<1e-7
-p=Path(__file__).resolve().parents[1]/'manuscript_figure_scripts/data'
+p=Path(__file__).resolve().parents[1]/'data'
 official={};local={}
 for line in (p/'igrf14coeffs_official.txt').read_text().splitlines():
  t=line.split()
@@ -64,7 +63,7 @@ results=dict(reference=v,scaling_fit_relative_delta=[float(xs.min()),float(xs.ma
 (OUT/'scientific_audit.json').write_text(json.dumps(results,indent=2));print(json.dumps(results,indent=2))
 
 # Independently differentiate one-orbit maps to verify the variational propagator.
-import orbital_poincare as o
+from numerical_experiments import orbital_poincare as o
 import csv
 if (OUT/'orbital_periodic_branch.csv').exists():
     shooting=list(csv.DictReader((OUT/'orbital_periodic_branch.csv').open()))

@@ -5,8 +5,4 @@ __pycache__/
 .DS_Store
 *.log
 *.npz
-research_assets/python/manuscript_figure_scripts/figures_out/
-research_assets/python/revision_checks/three_axis_perturbation_three_orbits.pdf
-research_assets/python/revision_checks/three_axis_perturbation_three_orbits.png
-research_assets/python/revision_checks/results/orbital_matched_poincare.pdf
-research_assets/python/revision_checks/results/charging_screening.pdf
+figures/generated/

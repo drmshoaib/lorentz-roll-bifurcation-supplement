@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 import fitz
 
-out = Path(__file__).resolve().parent.parent / "figures_out"
+out = Path(__file__).resolve().parent / "generated"
 out.mkdir(exist_ok=True)
 
 def pdf_first_page_to_png(pdf_path: Path, png_path: Path, scale: float = 2.8):
@@ -25,7 +25,7 @@ def add_panel_label(img_path: Path, label: str):
 
 # B1: actual non-autonomous constrained-roll integration, not illustrative curves.
 from scipy.integrate import solve_ivp
-import roll_model as model
+from model import roll_model as model
 
 alphaF0 = model.reference_values()["alphaF"]
 f0 = model.F_REF
