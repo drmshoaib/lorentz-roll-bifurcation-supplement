@@ -6,12 +6,12 @@ derived from first principles using the orbital/Lorentz/intrinsic-moment
 model of Section 2.
 """
 from pathlib import Path
-import roll_model as reference_model
+from model import roll_model as reference_model
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import brentq
 
-out = Path(__file__).resolve().parent.parent / "figures_out"
+out = Path(__file__).resolve().parent / "generated"
 out.mkdir(exist_ok=True)
 
 MU_E = reference_model.MU_E

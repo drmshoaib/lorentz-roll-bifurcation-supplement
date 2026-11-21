@@ -2,9 +2,8 @@
 from pathlib import Path
 import sys,json,csv
 import numpy as np
-sys.path.insert(0,str(Path(__file__).resolve().parent))
-import orbital_poincare as o
-import controlled_three_axis_validation as c
+from numerical_experiments import orbital_poincare as o
+from numerical_experiments import controlled_three_axis_validation as c
 m=o.m
 rows=[]
 for ratio in [.25,.5,.9]:

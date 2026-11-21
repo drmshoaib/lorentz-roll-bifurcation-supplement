@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 HERE = Path(__file__).resolve().parent
 DATA = HERE.parent / "data" / "igrf14_2025.txt"
-OUT = HERE.parent / "figures_out"
+OUT = HERE / "generated"
 OUT.mkdir(exist_ok=True)
 
 A_E = 6371.2e3

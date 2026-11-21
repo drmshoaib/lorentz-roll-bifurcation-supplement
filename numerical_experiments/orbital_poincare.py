@@ -11,9 +11,8 @@ from scipy.optimize import root,brentq,least_squares
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'manuscript_figure_scripts/figures'))
-import roll_model as m
-OUT=Path(__file__).resolve().parent/'results';OUT.mkdir(exist_ok=True)
+from model import roll_model as m
+OUT=Path(__file__).resolve().parents[1]/'data'/'results'; OUT.mkdir(parents=True,exist_ok=True)
 n=np.sqrt(m.MU_E/m.A_ORB**3); AF=m.reference_values()['alphaF']
 # Initial angle exactly as printed in the manuscript (frozen centre at 0.5 alpha_F,
 # rounded to six decimals). Circulating cases are sensitive to this rounding, so the

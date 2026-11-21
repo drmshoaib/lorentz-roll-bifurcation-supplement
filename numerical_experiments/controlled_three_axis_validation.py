@@ -235,7 +235,7 @@ def reference_dynamics_check(e=.001):
 
 def main():
     reference_dynamics_check()
-    out=Path(__file__).resolve().parent
+    out=Path(__file__).resolve().parents[1]/'data'/'results';out.mkdir(parents=True,exist_ok=True)
     scenarios=[
      (0.,.0,False,False,'circular uncharged exact control',0.),
      (.0,.001,False,False,'elliptic uncharged free',0.),
