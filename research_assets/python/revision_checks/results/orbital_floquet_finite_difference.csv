@@ -1,0 +1,5 @@
+ratio,finite_difference_step,max_matrix_difference
+0.5,1e-05,2.2868433535716548e-10
+0.9,1e-05,2.523384834418607e-10
+1.1,1e-05,2.4706781065475525e-10
+

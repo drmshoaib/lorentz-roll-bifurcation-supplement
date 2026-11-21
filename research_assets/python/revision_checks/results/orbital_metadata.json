@@ -1,0 +1,12 @@
+{
+  "reference_fold_Ckg": 1.0855600203727843e-06,
+  "initial_phi_rad": 6.060868181760399,
+  "mean_motion_s": 0.001101526655768052,
+  "orbital_period_s": 5704.070141451605,
+  "minimum_instantaneous_fold_ratio": 0.8661816339197302,
+  "max_step_s": 47.53391784543004,
+  "rtol": 1e-11,
+  "atol": 1e-13,
+  "shooting_failures": [],
+  "interpretation": "Finite-time maps do not establish global boundedness or chaos. Floquet classification applies only to shooting solutions."
+}

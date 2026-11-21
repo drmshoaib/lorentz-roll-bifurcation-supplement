@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "Please cite the associated paper for the scientific results and this repository for its numerical implementation."
+type: software
+title: "Supplementary Numerical Material for Lorentz-Driven Spacecraft Roll Bifurcations"
+authors:
+  - family-names: Shoaib
+    given-names: Muhammad
+    affiliation: "Smart and Scientific Solutions Ltd, Motherwell, United Kingdom"
+license: MIT
+repository-code: "https://github.com/drmshoaib/lorentz-roll-bifurcation-supplement"
+keywords:
+  - spacecraft dynamics
+  - Lorentz torque
+  - roll dynamics
+  - saddle-centre bifurcation
+  - periodic orbit collapse
+  - reproducibility
