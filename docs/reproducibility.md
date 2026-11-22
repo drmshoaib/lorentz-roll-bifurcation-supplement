@@ -10,9 +10,11 @@ The manuscript retains its analytical derivations and three-axis validation. Thi
 | 21-angle orbital sensitivity ensemble | `numerical_experiments/orbital_poincare.py` | `data/results/orbital_ensemble_members.csv`, `data/results/orbital_ensemble_summary.csv` |
 | Matched orbitally forced trajectories and stroboscopic points | `numerical_experiments/orbital_poincare.py` | `data/results/orbital_matched_summary.csv`, `data/results/orbital_stroboscopic_points.csv` |
 | Separate one-orbit periodic-response continuation, monodromy trace and finite differences | `numerical_experiments/orbital_poincare.py`, `reproducibility/scientific_audit.py` | `data/results/orbital_periodic_branch.csv`, `data/results/orbital_floquet_finite_difference.csv` |
+| Tolerance refinement of the 32-orbit net rotation (Table 1) | `numerical_experiments/net_turn_refinement.py` | `data/results/orbital_net_turn_refinement.csv` |
+| Forced roll span at the fold charge as the inertia ratio varies | `numerical_experiments/inertia_ratio_response.py` | `data/results/inertia_ratio_response.csv` |
 | Two-orbit response from the period-doubling point to its fold | `numerical_experiments/orbital_poincare.py` (`--period-two-only`) | `data/results/orbital_period_two_branch.csv`, `data/results/orbital_metadata.json` |
 | Three-axis tracking and tolerance tests | `numerical_experiments/controlled_three_axis_validation.py`, `reproducibility/validation_tables.py` | `data/results/three_axis_results.csv`, `data/results/three_axis_tolerance.csv` |
-| Positive/negative charging and sensitivity estimates | `numerical_experiments/charging_feasibility.py` | `data/results/charging_summary.json` and `data/results/charging_*.csv` |
+| Positive/negative charging, Parker-Murphy benchmark and sensitivity estimates | `numerical_experiments/charging_feasibility.py` | `data/results/charging_summary.json` and `data/results/charging_*.csv` |
 | IGRF-14 spectrum | `figures/generate_igrf_spectrum.py` | `data/igrf14_2025.txt` and `data/igrf14coeffs_official.txt`; regenerated figure under `figures/generated/` |
 | Nine manuscript figures and supplementary diagnostics | `figures/generate_revised_figures.py`, `figures/generate_section8_figures.py`, `figures/generate_appendix_figures.py` | Regenerated under `figures/generated/` |
 

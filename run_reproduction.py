@@ -52,7 +52,23 @@ def saved_results_integrity() -> None:
     assert abs(c["reference"]["alpha_Ckg"] / 1.0855600203727843e-6 - 1) < 1e-8
     assert c["reference"]["OML_small_body"] is False
     assert 4.78 < c["reference"]["ion_ram_energy_eV"] < 4.80
-    print("Selected ensemble, shooting, period-two, three-axis and charging results: OK", flush=True)
+    # Parker--Murphy benchmark at the reference dipole field and at the reduced asymmetry.
+    assert abs(c["reference"]["PM_magnetic_field_T"] - 3.72e-5) < 1e-12
+    assert abs(c["reference"]["PM_current_factor"] - 28.8145) < 1e-3
+    assert abs(c["reference"]["PM_ideal_power_W"] / 42350.88 - 1) < 1e-5
+    assert abs(c["reduced_asymmetry"]["PM_ideal_power_W"] - 2.0509) < 1e-3
+    with (RESULTS / "orbital_net_turn_refinement.csv").open(newline="") as f:
+        refinement = list(csv.DictReader(f))
+    # Net turns at 0.75 and 0.85 are resolved once rtol <= 1e-12; the other ratios are not.
+    assert len(refinement) == 40, len(refinement)
+    for ratio, net in ((0.75, 9.35), (0.85, -16.16)):
+        rows = [v for v in refinement if float(v["ratio"]) == ratio and float(v["rtol"]) <= 1e-12]
+        assert rows and all(abs(float(v["net_turns"]) - net) < 0.01 for v in rows), ratio
+    with (RESULTS / "inertia_ratio_response.csv").open(newline="") as f:
+        inertia = {(float(v["A_m2"]), float(v["rtol"])): float(v["span_40_orbits_deg"]) for v in csv.DictReader(f)}
+    for A, span in ((0.9994, 0.595), (0.99, 2.817), (0.9, 15.055)):
+        assert all(abs(inertia[(A, tol)] / span - 1) < 1e-3 for tol in (1e-10, 1e-12)), A
+    print("Selected ensemble, shooting, period-two, refinement, inertia-ratio, three-axis and charging results: OK", flush=True)
 
 
 def verify_igrf() -> None:
@@ -103,6 +119,8 @@ def main() -> None:
 
     for module in (
         "numerical_experiments.orbital_poincare",
+        "numerical_experiments.net_turn_refinement",
+        "numerical_experiments.inertia_ratio_response",
         "numerical_experiments.controlled_three_axis_validation",
         "reproducibility.validation_tables",
         "reproducibility.scientific_audit",
