@@ -536,21 +536,24 @@ def fig_orbital():
         v = curves[str(q)]
         ax[0].plot(np.linspace(0, 32, v.shape[1]), np.degrees(v[1] - phi0) / 1e3, color=col, lw=0.8, label=f"{q:g}")
         pp = [p for p in points if p["ratio"] == q]
-        ax[1].plot([np.degrees(np.angle(np.exp(1j * p["phi_rad"]))) for p in pp], [p["p"] for p in pp],
+        ax[1].plot([np.degrees(p["phi_rad"]) % 360 for p in pp], [p["p"] for p in pp],
                    "o", color=col, ms=1.9, mew=0, ls="none")
     ax[0].set_xlim(0, 32); ax[0].set_xlabel("orbital periods")
     ax[0].set_ylabel(r"unwrapped roll change ($10^3$ deg)", labelpad=1)
     ax[0].set_yticks([-5, 0, 5, 10])
     fig.legend(*ax[0].get_legend_handles_labels(), loc="outside lower center", ncol=7, fontsize=6.5,
                title=r"$\alpha^*/\alpha_{F,0}^*$", title_fontsize=6.5, handlelength=1.6, columnspacing=1.3)
-    ax[1].set_xlim(-180, 180); ax[1].set_xticks([-180, -90, 0, 90, 180])
+    ax[1].set_xlim(0, 360); ax[1].set_xticks([0, 90, 180, 270, 360])
     ax[1].set_xlabel(r"$\phi$ mod $360^\circ$ (deg)"); ax[1].set_ylabel(r"$p=\dot\phi/n$", labelpad=1)
     b = ax[2]
     b.axhline(2, color=GREY, lw=0.6, ls="--"); b.axhline(-2, color=GREY, lw=0.6, ls="--")
     b.axvline(qmin, color=LIGHT, lw=0.7)
+    qpd = json.loads((ORBITAL / "orbital_metadata.json").read_text())["period_doubling_ratio"]
+    b.axvline(qpd, color=LIGHT, lw=0.7)
+    b.text(qpd - 0.03, 0.75, f"{qpd:.3f}", fontsize=6, color=GREY, ha="right")
     b.plot([s["ratio"] for s in shoot], [s["trace"] for s in shoot], color=BLUE, lw=1.0)
     b.text(qmin - 0.03, 1.45, f"{qmin:.3f}", fontsize=6, color=GREY, ha="right")
-    b.set_xlim(0, 1.12); b.set_ylim(-2.3, 2.3)
+    b.set_xlim(0, 1.16); b.set_ylim(-2.3, 2.3)
     b.set_xlabel(r"$\alpha^*/\alpha_{F,0}^*$"); b.set_ylabel(r"one-orbit monodromy trace", labelpad=1)
     for a, t in zip(ax, ("(a)", "(b)", "(c)")):
         tag(a, t)

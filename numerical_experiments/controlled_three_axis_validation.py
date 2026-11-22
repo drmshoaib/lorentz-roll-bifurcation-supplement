@@ -29,7 +29,7 @@ INC = np.deg2rad(51.)
 F0 = np.deg2rad(60.)
 P_DIR = np.array([1.,0.,0.])
 Q_DIR = np.array([0.,np.cos(INC),np.sin(INC)])
-DIPOLE = np.array([0.,0.,1.])
+DIPOLE = np.array([0.,0.,-1.])
 OMEGA_E = np.array([0.,0.,W_E])
 
 
@@ -84,7 +84,7 @@ def centre(R,V,alpha):
     roots=[brentq(h,x[k],x[k+1]) for k in np.flatnonzero(y[:-1]*y[1:]<0)]
     centres=[z for z in roots if hp(z)<0]
     if not centres:raise ValueError("No stable roll centre")
-    target=np.deg2rad(314.4798663)
+    target=np.deg2rad(134.4798663)
     return min(centres,key=lambda v:abs(np.angle(np.exp(1j*(v-target)))))
 
 

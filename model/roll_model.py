@@ -10,7 +10,7 @@ from scipy.optimize import brentq
 
 MU_E = 3.9860e14
 OMEGA_E = 7.2921e-5
-B_D = 7.943e15
+B_D = -7.943e15  # Signed axial coefficient for the terrestrial dipole.
 
 A_INERTIA = 0.4
 B_INERTIA = 1.0

@@ -9,7 +9,7 @@ from scipy.optimize import brentq
 
 MU = 3.9860e14
 W_E = 7.2921e-5
-B_D = 7.943e15
+B_D = -7.943e15
 A, B, C = 0.4, 1.0, 1.0
 AORB = 6900e3
 ECC = 0.001
@@ -57,7 +57,7 @@ def fixed_points(alpha):
     roots = sorted(set(round(float(z), 12) for z in roots))
     return [(z, 'centre' if hp(z, alpha) < 0 else 'saddle') for z in roots]
 
-# Find the positive fold root using astroid geometry; select the angle near 314 deg.
+# Find the positive fold root using astroid geometry.
 fold_candidates = np.linspace(0, 2*np.pi, 50000)
 fold_angle = fold_candidates[np.argmin(np.abs(h(fold_candidates, fold)) + np.abs(hp(fold_candidates, fold)))]
 from scipy.optimize import root
@@ -98,7 +98,7 @@ print(f'ratio of transverse Lorentz torque to retained roll torque at fold = '
       f'{np.sqrt(X0**2+Y0**2)*abs(rbar)/np.hypot(al,bl):.6f}')
 
 assert np.isclose(fold,1.0855600203727837e-6,rtol=1e-10)
-assert abs(np.rad2deg(fold_angle)-314.4798663) < .001
+assert abs(np.rad2deg(fold_angle)-134.4798663) < .001
 assert abs(slopes['angular separation']-0.5) < 0.001
 assert abs(slopes['potential barrier']-1.5) < 0.001
 assert abs(slopes['linear period']+0.25) < 0.001

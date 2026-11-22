@@ -1,10 +1,10 @@
 {
   "reference": {
-    "aL": -0.2440804638137389,
-    "bL": 0.23114071444803833,
+    "aL": 0.2440804638137389,
+    "bL": -0.23114071444803833,
     "c": -3.647379490015027e-07,
     "alphaF": 1.0855600203727843e-06,
-    "phiF": 5.488709098886189,
+    "phiF": 2.347116445296396,
     "h_alpha_F": -0.33593521043915064,
     "h_phiphi_F": -1.0940335016647797e-06
   },
@@ -13,15 +13,15 @@
     0.001
   ],
   "scaling_slopes": [
-    0.4999972817064427,
-    1.499991876818567,
-    -0.25000679419921906
+    0.499997281707846,
+    1.4999918769393297,
+    -0.2500067941997389
   ],
-  "frozen_period_quadrature_s": 8363.6497965936,
-  "frozen_period_event_s": 8363.649796585561,
-  "frozen_relative_energy_drift": 3.5126790959489477e-13,
+  "frozen_period_quadrature_s": 8363.649796565694,
+  "frozen_period_event_s": 8363.64979658552,
+  "frozen_relative_energy_drift": 2.0336563187072857e-13,
   "official_IGRF_coefficients_equal": 195,
-  "official_IGRF_sha256": "8f8d88403028fc4ee92c4f38d97b46e0a87e2cfc496045b43c9e26c1d6b0903c",
+  "official_IGRF_sha256": "8bae47845ed0ddb38f85d7e1f47bd1da43ceb3144ffad460aafde93416f721f3",
   "versions": {
     "python": "3.13.2",
     "numpy": "2.2.6",

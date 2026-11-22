@@ -17,7 +17,7 @@ n=np.sqrt(m.MU_E/m.A_ORB**3); AF=m.reference_values()['alphaF']
 # Initial angle exactly as printed in the manuscript (frozen centre at 0.5 alpha_F,
 # rounded to six decimals). Circulating cases are sensitive to this rounding, so the
 # printed value is used to make the released data reproducible from the text.
-PHI0_DEG=347.262167
+PHI0_DEG=167.262167
 RATIOS=[0.,.25,.5,.75,.85,.9,1.1]
 ENSEMBLE_OFFSETS_DEG=np.linspace(-.01,.01,21)
 PROBE_OFFSETS_DEG=[-1e-6,1e-6]
@@ -91,7 +91,7 @@ def write(name,rows):
 def main():
     al,bl,c=m.roll_coefficients(m.F_REF)
     angles,centres=m.equilibria(.5*AF,al,bl,c,n=12000)
-    pcs=angles[centres]; target=np.deg2rad(314.4798663)
+    pcs=angles[centres]; target=np.deg2rad(134.4798663)
     centre=pcs[np.argmin(abs(np.angle(np.exp(1j*(pcs-target)))))]
     phi0=np.deg2rad(PHI0_DEG)
     assert abs(np.rad2deg(centre)-PHI0_DEG)<1e-6
@@ -132,15 +132,15 @@ def main():
 
 def continue_periodic(phi0,threshold):
     # Continue the non-rotating 1-orbit response from the uncharged centre.
-    shooting=[];z=np.array([0.,0.]); failed=[]
-    for ratio in np.linspace(0,1.1,56):
+    shooting=[];z=np.array([np.pi,0.]); failed=[]
+    for ratio in np.linspace(0,1.16,59):
         def fun(z):
             ss=integrate(ratio,z,orbits=1,variational=True)
             return ss.y[1:3,-1]-z
         def jac(z):
             ss=integrate(ratio,z,orbits=1,variational=True)
             return ss.y[3:,-1].reshape(2,2)-np.eye(2)
-        rr=least_squares(fun,z,jac=jac,bounds=([-np.pi,-2.],[np.pi,2.]),
+        rr=least_squares(fun,z,jac=jac,bounds=([0.,-2.],[2*np.pi,2.]),
                          xtol=1e-11,ftol=1e-11,gtol=1e-11,max_nfev=40)
         residual=float(np.linalg.norm(fun(rr.x)))
         if residual>1e-8:
@@ -157,9 +157,24 @@ def continue_periodic(phi0,threshold):
             multiplier2_real=float(eig[1].real),multiplier2_imag=float(eig[1].imag),
             refined_matrix_max_difference=float(abs(M-mr).max())))
     write('orbital_periodic_branch.csv',shooting)
+    def trace_at(ratio):
+        seed=np.array([shooting[55]['phi0_rad'],shooting[55]['p0']])
+        def residual(z):
+            ss=integrate(ratio,z,orbits=1,variational=True)
+            return ss.y[1:3,-1]-z
+        def jacobian(z):
+            ss=integrate(ratio,z,orbits=1,variational=True)
+            return ss.y[3:,-1].reshape(2,2)-np.eye(2)
+        solution=root(residual,seed,jac=jacobian,tol=1e-11)
+        if np.linalg.norm(residual(solution.x))>1e-10:
+            raise RuntimeError('One-orbit shooting failed near period doubling')
+        ss=integrate(ratio,solution.x,orbits=1,variational=True,rtol=2e-13,step=2*np.pi/240)
+        return np.trace(ss.y[3:,-1].reshape(2,2))
+    period_doubling_ratio=float(brentq(lambda q:trace_at(q)+2,1.10,1.12,xtol=1e-12))
     metadata=dict(reference_fold_Ckg=AF,initial_phi_rad=phi0,mean_motion_s=n,
         orbital_period_s=2*np.pi/n,minimum_instantaneous_fold_ratio=float(threshold.min()),
         max_step_s=(2*np.pi/120)/n,rtol=1e-11,atol=1e-13,shooting_failures=failed,
+        period_doubling_ratio=period_doubling_ratio,
         interpretation='Finite-time maps do not establish global boundedness or chaos. Floquet classification applies only to shooting solutions.')
     (OUT/'orbital_metadata.json').write_text(json.dumps(metadata,indent=2))
     return shooting,metadata
@@ -191,6 +206,56 @@ def periodic_branch_only():
     return continue_periodic(phi0,threshold)
 
 
+def period_two_branch(start=1.11410,step=5e-5,min_step=1e-6):
+    """Continue the elliptic two-orbit response created where the one-orbit trace reaches -2.
+
+    Natural-parameter continuation with a secant predictor. A step is accepted only if
+    Newton converges close to the predicted point with two distinct section points and a
+    two-orbit trace below 2; otherwise the step is halved. The branch ends where the step
+    falls below min_step, which brackets the fold at which it meets a hyperbolic
+    two-orbit response."""
+    def newton(ratio,z,orbits):
+        z=np.array(z,float)
+        for _ in range(40):
+            ss=integrate(ratio,z,orbits=orbits,variational=True,rtol=2e-13,step=2*np.pi/240)
+            res=ss.y[1:3,-1]-z
+            if np.linalg.norm(res)<1e-13:break
+            z=z-np.linalg.solve(ss.y[3:,-1].reshape(2,2)-np.eye(2),res)
+        ss=integrate(ratio,z,orbits=orbits,variational=True,rtol=2e-13,step=2*np.pi/240)
+        return z,ss.y[3:,-1].reshape(2,2),float(np.linalg.norm(ss.y[1:3,-1]-z))
+    meta=json.loads((OUT/'orbital_metadata.json').read_text()); qpd=meta['period_doubling_ratio']
+    branch=[{k:float(v) for k,v in r.items()} for r in csv.DictReader((OUT/'orbital_periodic_branch.csv').open())]
+    z1,M1,_=newton(start,[branch[-1]['phi0_rad'],branch[-1]['p0']],1)
+    w,v=np.linalg.eig(M1); vec=np.real(v[:,np.argmin(abs(w+1))]); vec/=np.linalg.norm(vec)
+    def solve(ratio,guess):
+        z2,M2,res=newton(ratio,guess,2)
+        mid=integrate(ratio,z2,orbits=1,rtol=2e-13,step=2*np.pi/240).y[1:3,-1]
+        return z2,mid,M2,res,float(np.linalg.norm(z2-mid))
+    for amp in (0.02,0.03,0.05):
+        z2,mid,M2,res,sep=solve(start,z1+amp*vec)
+        if res<1e-10 and sep>1e-3 and np.trace(M2)<2:break
+    else:
+        raise RuntimeError('two-orbit response not found above the period-doubling ratio')
+    rows=[];zs=[z2];qs=[start];q=start;h=step
+    def record(q,z2,mid,M2,res,sep):
+        rows.append(dict(ratio=q,phi_a_rad=float(z2[0]),p_a=float(z2[1]),phi_b_rad=float(mid[0]),p_b=float(mid[1]),
+            closure_residual=res,separation=sep,separation_over_sqrt=sep/np.sqrt(q-qpd),
+            two_orbit_trace=float(np.trace(M2)),det=float(np.linalg.det(M2))))
+    record(q,z2,mid,M2,res,sep)
+    while h>=min_step:
+        qn=q+h; guess=zs[-1] if len(zs)<2 else zs[-1]+(zs[-1]-zs[-2])*h/(qs[-1]-qs[-2])
+        z2,mid,M2,res,sep=solve(qn,guess)
+        if res<1e-10 and sep>1e-3 and np.trace(M2)<2 and np.linalg.norm(z2-guess)<0.02:
+            q=qn;zs.append(z2);qs.append(q);record(q,z2,mid,M2,res,sep)
+            print(f'period-two q={q:.6f} separation={sep:.4f} trace={np.trace(M2):.6f}',flush=True)
+        else:
+            h/=2
+    write('orbital_period_two_branch.csv',rows)
+    meta.update(period_two_last_elliptic_ratio=float(q),period_two_fold_bracket=[float(q),float(q+2*h)])
+    (OUT/'orbital_metadata.json').write_text(json.dumps(meta,indent=2))
+    return rows
+
+
 def refine_long_horizon():
     rows=list(csv.DictReader((OUT/'orbital_matched_summary.csv').open()))
     result=[]
@@ -208,7 +273,9 @@ if __name__=='__main__':
     elif '--plot-only' in sys.argv:plot_saved()
     elif '--refine-only' in sys.argv:refine_long_horizon()
     elif '--ensemble-only' in sys.argv:print(*ensemble(),sep='\n')
+    elif '--period-two-only' in sys.argv:period_two_branch()
     else:
         main()
         refine_long_horizon()
+        period_two_branch()
 

@@ -16,7 +16,7 @@ out.mkdir(exist_ok=True)
 
 MU_E = reference_model.MU_E
 OMEGA_E = reference_model.OMEGA_E
-B_D = 7.943e15
+B_D = -7.943e15
 A_INERTIA = 0.4
 B_INERTIA = 1.0
 C = 1.0
@@ -139,7 +139,7 @@ r_ref = orbital_quantities(F_REF)[0]
 u_ref = F_REF
 BT = -(B_D / r_ref ** 3) * np.sin(INC) * np.cos(u_ref)
 BN = -(B_D / r_ref ** 3) * np.cos(INC)
-Bdip_r3 = B_D / r_ref ** 3
+Bdip_r3 = abs(B_D) / r_ref ** 3
 mhat = np.array([1.0, 1.0, 0.0]) / np.sqrt(2)
 
 eta_grid = np.array([0.0, 0.1, 0.25, 0.5])

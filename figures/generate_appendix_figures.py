@@ -35,7 +35,7 @@ a0, b0, c0 = model.roll_coefficients(f0)
 def initial_centre(alpha):
     angles, is_centre = model.equilibria(alpha, a0, b0, c0, n=10000)
     centres = angles[is_centre]
-    reference_fold_angle = np.deg2rad(314.4798663)
+    reference_fold_angle = np.deg2rad(134.4798663)
     distance = np.abs(np.angle(np.exp(1j * (centres-reference_fold_angle))))
     return float(centres[np.argmin(distance)])
 

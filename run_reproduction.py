@@ -34,17 +34,25 @@ def saved_results_integrity() -> None:
     with (RESULTS / "three_axis_results.csv").open(newline="") as f:
         tracking = list(csv.DictReader(f))
     assert len(members) == 7 * 23, len(members)
-    assert len(ensemble) == 7 and len(branch) == 56, (len(ensemble),len(branch))
+    assert len(ensemble) == 7 and len(branch) == 59, (len(ensemble),len(branch))
     assert len(tracking) >= 15, len(tracking)
     assert all(int(v["ensemble_size"]) == 21 for v in ensemble)
     assert abs(float(ensemble[2]["nominal_span_32_orbits_deg"]) - 672.2356) < 2
-    assert abs(float(branch[-1]["trace"]) + 1.94724) < 0.02
+    assert abs(float(branch[55]["trace"]) + 1.94724) < 0.02
+    assert abs(float(branch[-1]["trace"]) + 2.17785) < 0.02
+    with (RESULTS / "orbital_period_two_branch.csv").open(newline="") as f:
+        period_two = list(csv.DictReader(f))
+    with (RESULTS / "orbital_metadata.json").open() as f:
+        meta = json.load(f)
+    assert abs(meta["period_doubling_ratio"] - 1.114056) < 1e-5
+    assert abs(meta["period_two_last_elliptic_ratio"] - 1.11526) < 1e-4
+    assert all(float(v["two_orbit_trace"]) < 2 and float(v["separation"]) > 1e-3 for v in period_two)
     with (RESULTS / "charging_summary.json").open() as f:
         c = json.load(f)
     assert abs(c["reference"]["alpha_Ckg"] / 1.0855600203727843e-6 - 1) < 1e-8
     assert c["reference"]["OML_small_body"] is False
     assert 4.78 < c["reference"]["ion_ram_energy_eV"] < 4.80
-    print("Selected ensemble, shooting, three-axis and charging results: OK", flush=True)
+    print("Selected ensemble, shooting, period-two, three-axis and charging results: OK", flush=True)
 
 
 def verify_igrf() -> None:

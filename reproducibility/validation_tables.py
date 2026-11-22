@@ -9,7 +9,7 @@ rows=[]
 for ratio in [.25,.5,.9]:
  al,bl,cc=m.roll_coefficients(m.F_REF);aa=ratio*o.AF
  roots,iscentre=m.equilibria(aa,al,bl,cc,n=10000);cs=roots[iscentre]
- phi=cs[np.argmin(abs(np.angle(np.exp(1j*(cs-np.deg2rad(314.4798663))))))]
+ phi=cs[np.argmin(abs(np.angle(np.exp(1j*(cs-np.deg2rad(134.4798663))))))]
  sol=o.integrate(ratio,[phi,0],orbits=1); ss=np.linspace(0,2*np.pi,1801);ff,pp,vv=sol.sol(ss)
  rate=vv*o.n; _,r,_,fd=m.orbit_state(ff)
  fdd=-2*fd*m.orbit_state(ff)[2]/r

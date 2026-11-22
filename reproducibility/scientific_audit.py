@@ -27,7 +27,7 @@ for x in xs:
 slopes=[float(np.polyfit(np.log(xs),np.log(y),1)[0]) for y in [sep,barrier,periods]]
 assert max(abs(np.array(slopes)-[.5,1.5,-.25]))<5e-4
 # Integrate a frozen libration and compare a return event with energy quadrature.
-alpha=.5*af; roots,centres=m.equilibria(alpha,al,bl,c); pc=roots[centres][-1]
+alpha=.5*af; roots,centres=m.equilibria(alpha,al,bl,c); pc=min(roots[centres],key=lambda x:abs(np.angle(np.exp(1j*(x-phif)))))
 phi0=pc+.05;energy=m.potential(phi0,alpha,al,bl,c)
 turn=brentq(lambda x:m.potential(x,alpha,al,bl,c)-energy,pc-.2,pc)
 mid=(turn+phi0)/2;half=(phi0-turn)/2
