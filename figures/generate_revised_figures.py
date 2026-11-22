@@ -117,10 +117,30 @@ def turning(al, E, w):
     return brentq(f, w["left"], w["c"], xtol=1e-15), brentq(f, w["c"], w["right"], xtol=1e-15)
 
 
+def V_drop(x0, dx, al):
+    """V(x0) - V(x0 + dx) by sum-to-product identities, with no subtractive cancellation.
+
+    Near the fold the well depth is many orders below |V|, so E - V(x) evaluated
+    directly loses all significance at the quadrature nodes close to a turning point.
+    """
+    a, b = al * aL, al * bL
+    s, m2 = np.sin(dx / 2), 2 * x0 + dx
+    return 2 * s * (a * np.cos(m2 / 2) + b * np.sin(m2 / 2) + c * np.sin(m2) * np.cos(dx / 2))
+
+
 def period(al, E, w):
     lo, hi = turning(al, E, w)
-    mid, half = (lo + hi) / 2, (hi - lo) / 2
-    g = lambda t: half * np.cos(t) / np.sqrt(max(E - V(mid + half * np.sin(t), al), 1e-300))
+    half = (hi - lo) / 2
+
+    def g(t):
+        # E = V(lo) = V(hi); measure the drop from the nearer turning point, with
+        # 1 -/+ sin t written as 2 sin^2(pi/4 -/+ t/2) to keep the offset exact.
+        if t < 0:
+            rad = V_drop(lo, 2 * half * np.sin(np.pi / 4 + t / 2)**2, al)
+        else:
+            rad = V_drop(hi, -2 * half * np.sin(np.pi / 4 - t / 2)**2, al)
+        return half * np.cos(t) / np.sqrt(rad)
+
     return np.sqrt(2 * C) * quad(g, -np.pi / 2, np.pi / 2, limit=500, epsabs=0, epsrel=1e-11)[0]
 
 
@@ -536,23 +556,24 @@ def fig_orbital():
         v = curves[str(q)]
         ax[0].plot(np.linspace(0, 32, v.shape[1]), np.degrees(v[1] - phi0) / 1e3, color=col, lw=0.8, label=f"{q:g}")
         pp = [p for p in points if p["ratio"] == q]
-        ax[1].plot([np.degrees(p["phi_rad"]) % 360 for p in pp], [p["p"] for p in pp],
+        ax[1].plot([np.degrees(p["phi_rad"] % (2 * np.pi)) for p in pp], [p["p"] for p in pp],
                    "o", color=col, ms=1.9, mew=0, ls="none")
     ax[0].set_xlim(0, 32); ax[0].set_xlabel("orbital periods")
     ax[0].set_ylabel(r"unwrapped roll change ($10^3$ deg)", labelpad=1)
     ax[0].set_yticks([-5, 0, 5, 10])
     fig.legend(*ax[0].get_legend_handles_labels(), loc="outside lower center", ncol=7, fontsize=6.5,
                title=r"$\alpha^*/\alpha_{F,0}^*$", title_fontsize=6.5, handlelength=1.6, columnspacing=1.3)
+    # 0-360 keeps the libration about the zero-charge centre at 180 deg clear of the wrap.
     ax[1].set_xlim(0, 360); ax[1].set_xticks([0, 90, 180, 270, 360])
     ax[1].set_xlabel(r"$\phi$ mod $360^\circ$ (deg)"); ax[1].set_ylabel(r"$p=\dot\phi/n$", labelpad=1)
     b = ax[2]
     b.axhline(2, color=GREY, lw=0.6, ls="--"); b.axhline(-2, color=GREY, lw=0.6, ls="--")
     b.axvline(qmin, color=LIGHT, lw=0.7)
-    qpd = json.loads((ORBITAL / "orbital_metadata.json").read_text())["period_doubling_ratio"]
-    b.axvline(qpd, color=LIGHT, lw=0.7)
-    b.text(qpd - 0.03, 0.75, f"{qpd:.3f}", fontsize=6, color=GREY, ha="right")
+    b.axvline(json.loads((ORBITAL / "orbital_metadata.json").read_text())["period_doubling_ratio"], color=ORANGE, lw=0.8, ls="--")
     b.plot([s["ratio"] for s in shoot], [s["trace"] for s in shoot], color=BLUE, lw=1.0)
+    qpd = json.loads((ORBITAL / "orbital_metadata.json").read_text())["period_doubling_ratio"]
     b.text(qmin - 0.03, 1.45, f"{qmin:.3f}", fontsize=6, color=GREY, ha="right")
+    b.text(qpd - 0.03, 0.75, f"{qpd:.3f}", fontsize=6, color=ORANGE, ha="right")
     b.set_xlim(0, 1.16); b.set_ylim(-2.3, 2.3)
     b.set_xlabel(r"$\alpha^*/\alpha_{F,0}^*$"); b.set_ylabel(r"one-orbit monodromy trace", labelpad=1)
     for a, t in zip(ax, ("(a)", "(b)", "(c)")):
@@ -570,4 +591,3 @@ if __name__ == "__main__":
     fig_scaling()
     fig_similarity()
     fig_orbital()
-

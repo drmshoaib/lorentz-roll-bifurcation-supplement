@@ -15,6 +15,9 @@ OUT=Path(__file__).resolve().parents[1]/'data'/'results'; OUT.mkdir(parents=True
 AF=m.reference_values()['alphaF']
 # O+ mass from the standard atomic weight of oxygen (15.999 u), not 16 proton masses.
 M_OXYGEN_ION=15.999*atomic_mass
+# Magnitude of the manuscript dipole at the reference orbital location (3.7192e-5 T),
+# rounded to the three figures quoted in the text; main() checks it against roll_model.
+B_MAG_REF=3.72e-5
 
 def ion_current_negative_surrogate(u, ram_current, thermal_current, ram_energy_V):
     """Legacy screening interpolation, restricted to -E_ram/e <= U <= 0.
@@ -39,11 +42,15 @@ def negative_bias_root(balance, ram_energy_V):
     return float(brentq(balance, lo, hi, xtol=1e-13))
 
 
-def scales(mass=10.,radius=1.,asym=.6,offset=1.,density=1e11,te=.2,ti=.1, speed=7600.):
+def scales(mass=10.,radius=1.,asym=.6,offset=1.,density=1e11,te=.2,ti=.1, speed=7600.,magnetic_field=B_MAG_REF):
     alpha=AF*asym/.6/offset
     charge=mass*alpha; cap=4*np.pi*epsilon_0*radius; U=charge/cap
     debye=np.sqrt(epsilon_0*te/(density*qe))
     ie0=4*np.pi*radius**2*qe*density*np.sqrt(qe*te/(2*np.pi*m_e))
+    # Classical Parker--Murphy benchmark; ie0 uses the full sphere area.
+    magnetic_voltage=qe*magnetic_field**2*radius**2/(8*m_e)
+    pm_factor=.5*(1+np.sqrt(U/magnetic_voltage))
+    pm_current=ie0*pm_factor
     ii_ram=np.pi*radius**2*qe*density*speed
     ii_th=4*np.pi*radius**2*qe*density*np.sqrt(qe*ti/(2*np.pi*M_OXYGEN_ION))
     # Positive-sphere OML. Deliberately retain validity flag in every row.
@@ -67,6 +74,10 @@ def scales(mass=10.,radius=1.,asym=.6,offset=1.,density=1e11,te=.2,ti=.1, speed=
         ion_ram_A=ii_ram,ion_thermal_A=ii_th,ion_ram_energy_eV=eram,
         photo_zero_bias_A=iph0,OML_extrapolated_A=ioml,
         geometric_power_W=ie0*U,OML_extrapolated_power_W=ioml*U,
+        PM_magnetic_field_T=magnetic_field,PM_voltage_V=magnetic_voltage,
+        PM_current_factor=pm_factor,PM_current_A=pm_current,PM_ideal_power_W=U*pm_current,
+        PM_model_status='classical_spherical_collisionless_magnetic_collection_benchmark',
+        PM_minimum_beam_recoil_N=pm_current*np.sqrt(U*(U+2*m_e*light_speed**2/qe))/light_speed,
         geometric_charge_loss_scale_s=charge/ie0,OML_extrapolated_loss_scale_s=charge/ioml,
         leakage_resistance_for_one_percent_per_orbit_ohm=(2*np.pi*np.sqrt(m.A_ORB**3/m.MU_E))/(cap*(-np.log(.99))),
         minimum_beam_recoil_at_geometric_current_N=ie0*np.sqrt(U*(U+2*m_e*light_speed**2/qe))/light_speed,
@@ -80,6 +91,9 @@ def write(name,rows):
         w=csv.DictWriter(f,fieldnames=rows[0],lineterminator='\n');w.writeheader();w.writerows(rows)
 
 def main():
+    r_ref=m.A_ORB*(1-m.ECC**2)/(1+m.ECC*np.cos(m.F_REF))
+    cos_colat=np.sin(m.INC)*np.sin(m.OMEGA_PERI+m.F_REF)
+    assert np.isclose(B_MAG_REF,abs(m.B_D)/r_ref**3*np.sqrt(1+3*cos_colat**2),rtol=1e-3)
     rows=[scales(density=n,te=t) for n in [1e9,1e10,1e11,1e12] for t in [.1,.2,1.]]
     write('charging_environment.csv',rows)
     scan=[scales(mass=mass,radius=r,asym=d,offset=rho) for mass in [1.,10.,100.]
@@ -136,4 +150,3 @@ def main():
     fig.tight_layout();fig.savefig(OUT/'charging_screening.pdf');plt.close(fig)
     print(json.dumps(summary,indent=2))
 if __name__=='__main__':main()
-

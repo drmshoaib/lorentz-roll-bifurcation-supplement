@@ -21,8 +21,10 @@ model/
     roll_model.py                        Reduced roll equation and reference parameters
 numerical_experiments/
     orbital_poincare.py                  Matched trajectories, sensitivity ensemble and Floquet shooting
+    net_turn_refinement.py              Tolerance refinement of the 32-orbit net rotation
+    inertia_ratio_response.py           Forced roll span at the fold charge versus |A-B|/C
     controlled_three_axis_validation.py Full three-axis attitude consistency calculations
-    charging_feasibility.py             Conditional plasma-current and power screening
+    charging_feasibility.py             Conditional plasma-current screening and Parker-Murphy benchmark
 reproducibility/
     independent_fold_check.py           Independent fold/scaling checks
     scientific_audit.py                 Coefficient, period, IGRF and Floquet checks
@@ -71,7 +73,7 @@ For full numerical reproduction:
 python run_reproduction.py --full
 ```
 
-This re-integrates the initial-angle ensemble and 32-orbit trajectories, continues the one-orbit periodic-response branch to 1.16 times the reference fold charge and the two-orbit branch created at its period-doubling point, runs the controlled three-axis experiments, recalculates the charging screen and regenerates all nine manuscript figures. The full calculation is substantially more expensive than the smoke test. Outputs are written under `data/results/` and `figures/generated/`.
+This re-integrates the initial-angle ensemble and 32-orbit trajectories, continues the one-orbit periodic-response branch to 1.16 times the reference fold charge and the two-orbit branch created at its period-doubling point, repeats the net-turn tolerance refinement and the inertia-ratio integrations, runs the controlled three-axis experiments, recalculates the charging screen and regenerates all nine manuscript figures. The full calculation is substantially more expensive than the smoke test. Outputs are written under `data/results/` and `figures/generated/`.
 
 Individual modules can also be run from the root, for example:
 
@@ -88,9 +90,9 @@ python -m figures.generate_igrf_spectrum
 
 The trapped periodic family belongs to the **frozen autonomous** roll model. The coefficients of the actual orbital problem vary significantly within one orbital period, so the frozen family should not be treated as an adiabatically realised spacecraft orbit.
 
-The orbitally forced 32-orbit trajectories are sensitive to the initial roll angle, including offsets of `1e-6` degrees. The 21-angle ensemble spans are finite **sample ranges**, not confidence intervals or converged long-term predictions. The times of the first full-turn excursion and short-horizon excursions are more repeatable. The separate one-orbit shooting solutions have their own initial conditions; Floquet multipliers give a linear classification. The one-orbit trace reaches -2 at 1.11406 times the reference fold charge, where a linearly elliptic two-orbit response bifurcates; that response ends in a fold at 1.11526.
+The orbitally forced 32-orbit trajectories are sensitive to the initial roll angle, including offsets of `1e-6` degrees. The 21-angle ensemble spans are finite **sample ranges**, not confidence intervals or converged long-term predictions. The times of the first full-turn excursion and short-horizon excursions are more repeatable. The 32-orbit net rotation is resolved under tolerance refinement at charge ratios 0.75 and 0.85 and unresolved at 0.50, 0.90 and 1.10 (`data/results/orbital_net_turn_refinement.csv`). The separate one-orbit shooting solutions have their own initial conditions; Floquet multipliers give a linear classification. The one-orbit trace reaches -2 at 1.11406 times the reference fold charge, where a linearly elliptic two-orbit response bifurcates; that response ends in a fold at 1.11526.
 
-The three-axis tests use ideal, unsaturated transverse feedback and are numerical consistency checks rather than a flight-qualified controller. The charging study uses screening currents and conditional power scales, not a self-consistent sheath or hardware model; the attracted-electron OML law is outside its small-body domain for the reference conductor.
+The three-axis tests use ideal, unsaturated transverse feedback and are numerical consistency checks rather than a flight-qualified controller. The charging study uses screening currents and conditional power scales, not a self-consistent sheath or hardware model; the attracted-electron OML law is outside its small-body domain for the reference conductor, and the Parker-Murphy current is a classical magnetic-collection benchmark evaluated at the reference dipole field of 3.72e-5 T.
 
 The supplementary repository excludes private drafts, internal correspondence, revision history and unrelated exploratory material.
 
